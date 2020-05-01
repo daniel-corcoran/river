@@ -1,8 +1,6 @@
 ![](river.jpg)
 
 
-##Official Documentation
-
 
 1. Declaring variables
 
