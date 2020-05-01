@@ -1,4 +1,4 @@
-<div style="text-align:center"><img src='river/river.jpg'></div>
+<div style="text-align:center"><img src='river.jpg'></div>
 
 
 Each program can only be 64 'commands' long. Each command can be represented as a long double. Coming soon isvariable program size, but program size will be fixed at compile time.

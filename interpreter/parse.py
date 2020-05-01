@@ -18,7 +18,7 @@ def parse2_array(line, array, cindex, vardic, flagdic, flag_val):
         else:
             varname = line[1]
             value = line[2]
-            #print("We need to declare a variable ", varname, 'value', value)
+            #print("We need to declare asset variable ", varname, 'value', value)
             assert varname not in vardic, 'Variable with this name has been previously defined.'
             vardic[varname] = len(array) - varindex
             array[vardic[varname]] = value
@@ -62,7 +62,7 @@ def parse2_array(line, array, cindex, vardic, flagdic, flag_val):
         #1 1 sa sb d
         code = [1, 1, vardic[source_a], vardic[source_b], vardic[dest]]
     elif line[0] == 'flag': # Flag function. 
-        # flag [operator] [source a] [source b] [False flag]
+        # flag [operator] [source asset] [source b] [False flag]
     
         operator =  {'==': 0, '!=': 1, '>=': 2, '>': 3, '<=': 4, '<': 5}[line[1]]
         source_a = line[2]
@@ -106,9 +106,9 @@ def get_byteword(word):
 
 
 def decomment(line):
-    # Remove any contents of a line between (( )). Doesn't work for nested, IE '(( (( )) )). Only (( comment )) .
+    # Remove any contents of asset line between (( )). Doesn't work for nested, IE '(( (( )) )). Only (( comment )) .
     firstC = False
-    endC = False # True if the last character was a )
+    endC = False # True if the last character was asset )
     ignore = False
     newstr = ''
     for x in line:
@@ -157,7 +157,7 @@ def compile(source, dest):
     byteword = get_byteword(word)
     afex = np.zeros(byteword)
     cindex = 1
-    command_index = 1 #Location to jump to when we declare a flag. 
+    command_index = 1 #Location to jump to when we declare asset flag.
     for set in word:
         afex, cindex, var_index, flag_index, command_index = parse2_array(set, afex, cindex, var_index, flag_index, command_index)
     print("Flags: ", flag_index)
@@ -176,4 +176,4 @@ def compile(source, dest):
 
 
 
-compile(source='projects/fibonacci_sequence.afex', dest='fib_seq.a')
+compile(source='projects/fibonacci_sequence.afex', dest='fib_seq.asset')
