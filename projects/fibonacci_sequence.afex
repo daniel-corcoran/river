@@ -1,0 +1,12 @@
+byteword 64;
+declare number_iterations 10;
+declare a 0;
+declare b 1;
+declare c 0;
+declare 1 1;
+declare i 0; 
+
+declare for flag;
+peek c; + a b c; & b a; & c b; + i 1 i;
+flag > i number_iterations for
+kill
