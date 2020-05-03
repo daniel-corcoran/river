@@ -1,0 +1,8 @@
+byteword 64; ((Set the maximum length as 64.))
+
+= x55 0; = x56 0; = x62 0; = x0 0; = x59 1; = x60 -1; = x58 2; = x57 4 ;= x63 100000
+= for flag
+^ x60 x62 x56; * x62 x58 x55; + x59 x55 x55; / x56 x55 x55; * x57 x55 x55; + x55 x0 x0; + x62 x59 x62
+flag > x62 x63 for
+peek x0
+kill

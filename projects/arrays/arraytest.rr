@@ -1,0 +1,9 @@
+byteword 512;
+
+@ my_array 10 10
+
+for a 0 10
+    for b 0 10
+        my_array a b a
+peek my_array
+kill
