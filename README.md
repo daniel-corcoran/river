@@ -76,5 +76,17 @@
    Output: 13
    
     ```
-    
-                                                                                                                   
+5. FOR loops
+    ```
+        for [counter] [endpoint] [increment]
+           ...   
+    ```                
+   
+6. Nested operations
+    ```
+    + ^ a b c. + 5 5. out
+   peek out
+   = a 2; = b 3; = c 4; = out 0;
+   
+   Output: (2 ^ 3 ^ 4) + (5 + 5)
+    ```                                                                                                

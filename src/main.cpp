@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <cmath>
 //Compiler functions
+
 bool logic(int operand, long double value_a, long double value_b) {
 	bool statement;
 //	std::cout << value_a <<  " [comparator: " << operand << "] " << value_b << std::endl;
@@ -140,52 +141,24 @@ long double process(long double *afex_array) {
 		}
 
 	}
-	std::cout << "afex: process terminated\n";
+	std::cout << "River: process terminated\n";
 }
 //File processing functio
-void unpack(std::string cmd) {
-	std::cout << cmd;
-	std::string path;
-	std::cin >> path;
-	long double array[64]; //Fix this!
-	std::cout << path;
+void unpack(std::string path) {
+	long double array[512]; //Fix this to be a vector FIXME
 	std::ifstream file;
 	file.open(path);
 
 	long double value; 
-	for (int i = 0; i < 64; i++) {
+	for (int i = 0; i < 512; i++) {
 		file >> value; 
 		array[i] = value;
 		//std::cout << "[" << value << "],";
 	}
-	std::cout << "\nafex: Process loaded\n";
-
 	process(array);
 }
-//Menu functions
-void help() {
-	std::cout << "do --> open compiler\nhelp --> open help menu\nexit --> close afex\n";
-}
-int main()
+int main(int argc, char *argv[])
 {
-	std::cout << " <|--aFex Language--|>  |\n      build 0.0.1a      |\n________________________|\n";
-	std::string cmd_input;
-	while (true) {
-		std::cout << "afex_compiler$:";
-		std::cin >> cmd_input;
-		
-		if (cmd_input == "help") {
-			help();
-		}
-		else if (cmd_input.substr(0, 2) == "do") {
-			cmd_input.erase(0, 3);
-		//	std::cout << "unpacking file " << cmd_input << std::endl;
-			unpack(cmd_input);
-			break;
-		}else if (cmd_input == "exit") {
-			return 0;
-		}else {
-			std::cout << "::" << cmd_input << "  -- command not found (error 0)\n";
-		}
-	}
+std::cout << "River Build 0.1\n";
+unpack(argv[1]);
 }
