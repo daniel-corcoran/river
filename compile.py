@@ -3,9 +3,9 @@ from interpreter import parse
 import os
 
 if __name__ == '__main__':
-    parse.compile(source='projects/for_loops/nested_for.rr', dest='projects/for_loops/nested_for.a', debug=True)
+    parse.compile(source='projects/arrays/arraytest.rr', dest='projects/arrays/arraytest.a', debug=True)
     input()
-    os.system('./river projects/for_loops/nested_for.a')
+    os.system('./projects/arrays/arraytest.a')
 
 
 

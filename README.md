@@ -4,27 +4,27 @@
 
 1. Declaring variables
 
-    `declare [variable name] [value]`
+    `= [variable name] [value]`
     
     Example:
     ```
    byteword 64;
-   declare pi 3.14159
+   = pi 3.14159
    peek pi
    
    output: 3.14159
    ```
 2. Declaring flags
     
-    `declare [flag name] flag`
+    `flag [flag name]`
     
     Flags serve as reference points that your code can jump to at any point.
     
     Example: 
     ```
     byteword 64;
-    declare 5 5;
-    declare my_flag flag;
+    = 5 5;
+    = my_flag flag;
     + 5 5 5
     peek 5 
     $ my_flag
@@ -44,15 +44,15 @@
     
     Example:
     ```
-   byteword 64; (( Allocate 64 spaces ))
-   declare counter 0;
-   declare max_count 10;
-   declare 1 1; (( Since all values must be variables, we define integers individually. ))
-   declare flag my_flag; (( We can jump to this point from anywhere in the code. ))
-   + 1 counter counter;
-   peek counter;
-   > counter max_count my_flag;
-   kill;
+   byteword 64 (( Allocate 64 spaces ))
+   = counter 0
+   = max_count 10
+   = 1 1 (( Since all values must be variables, we define integers individually. ))
+   flag my_flag (( We can jump to this point from anywhere in the code. ))
+   + 1 counter counter
+   peek counter
+   > counter max_count my_flag
+   kill
    
    Output: 1 2 3 4 5 6 7 8 9 10
    
@@ -89,4 +89,24 @@
    = a 2; = b 3; = c 4; = out 0;
    
    Output: (2 ^ 3 ^ 4) + (5 + 5)
-    ```                                                                                                
+    ```          
+7. Multidimensional arrays
+``` 
+    @ my_array 10 10
+    for a 0 10
+        for b 0 10
+            my_array a b a
+    peek my_array
+    
+    Output:
+    0 1 2 3 4 5 6 7 8 9
+    0 1 2 3 4 5 6 7 8 9
+    0 1 2 3 4 5 6 7 8 9
+    0 1 2 3 4 5 6 7 8 9
+    0 1 2 3 4 5 6 7 8 9
+    0 1 2 3 4 5 6 7 8 9
+    0 1 2 3 4 5 6 7 8 9
+    0 1 2 3 4 5 6 7 8 9
+    0 1 2 3 4 5 6 7 8 9
+    0 1 2 3 4 5 6 7 8 9
+```                                                                                      
