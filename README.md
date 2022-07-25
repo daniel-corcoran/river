@@ -1,20 +1,34 @@
-![](river.jpg)
+# River Programming Language
+
+
 
 Example program: Calculate pi via Leibniz  summation
-```byteword 64; ((Set the maximum length as 64.))
+```
 
-= x55 0; = x56 0; = x62 0; = x0 0; = x59 1;
-= x60 -1; = x58 2; = x57 4 ;= x63 100000
-= for flag
-^ x60 x62 x56; * x62 x58 x55; + x59 x55 x55;
-/ x56 x55 x55; * x57 x55 x55; + x55 x0 x0; + x62 x59 x62
-flag > x62 x63 for
-peek x0
+= sum 0;
+= max_iter 10000000;
+
+for = n 0 .  < n max_iter . = n + n 1
+	= sum + sum * 4 / ^ -1 n . + * n 2 . 1
+	peek sum
+
 kill
-
 Output: 3.14159
 ```
 
+## Usage
+```shell
+
+# Compile a program to bytecode
+python3 compile.py projects/for_loops/pi_chained.rr projects/for_loops/pi_chained.a
+
+# Execute bytecode using the AFEX interpreter https://github.com/daniel-corcoran/afex
+./bin/main projects/for_loops/pi_chained.a
+```
+
+
+## Programming specification
+#### Note: I still need to update this, some of these don't work anymore with updates to the mathematical notation
 
 1. Declaring variables
 
@@ -73,25 +87,23 @@ Output: 3.14159
     ```
 4. Mathematical operations
     
+   the way math works in this language is pretty peculiar, I will do a writeup on it soon
+
     `[operator] [variable 1] [variable 2] [destination variable]`
     
     Legal operators: `^ - + * / `
     
     Example:
     ```
-   byteword 64; (( Allocate 64 spaces ))
-   declare a 5;
-   declare b 7;
-   declare c 0;
-   + a b c;
-   peek c;
-   kill;
-   
-   Output: 13
-   
+   = a 5;
+   = b 7;
+   = c 0;
+   = + a b c ; (( a + b = c ))
+   = + a - b c . . d; (( a + ( b - c ) = d))
     ```
 5. FOR loops
-    ```
+   ### Note, a major update has changed the way this works as well, see the pi example for syntax, a writeup is needed  
+   ```
         for [counter] [endpoint] [increment]
            ...   
     ```                

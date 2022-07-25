@@ -1,5 +1,3 @@
-byteword 128;
-
 for a 3 18 3
 	peek a
 	for b 0 25 5

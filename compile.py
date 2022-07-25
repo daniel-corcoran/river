@@ -1,11 +1,11 @@
 import argparse
+import sys
+
 from interpreter import parse
 import os
 
 if __name__ == '__main__':
-    parse.compile(source='projects/arrays/arraytest.rr', dest='projects/arrays/arraytest.a', debug=True)
-    input()
-    os.system('./projects/arrays/arraytest.a')
+    parse.compile(path=sys.argv[1], dest=sys.argv[2], debug=False)
 
 
 

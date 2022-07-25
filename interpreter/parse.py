@@ -1,8 +1,54 @@
 # This file takes aFex wordcode and converts it to aFex bytecode.
 import re
 import numpy as np
+import itertools
+from interpreter.decompose_0_0_2b import dec, split_commands_and_args, pretty_print_command_tree, mathop
 
-lgl_cmd = ['byteword', '=', 'for', '@']
+
+def decompile(code, var_dic):
+    # Prettily prints compiled code so we can validate it.
+
+    print("_________________")
+    print("afex generated")
+    print("\n\n\n\n")
+
+    for line in code:
+        print(line)
+        solved = False
+        command = int(line[0])
+
+        if (len(line) > 1):
+            args = line[1:]
+
+            if command == 0:
+                solved = True
+                print("COPY", args[0], 'TO', args[1])
+            elif command == 1:
+                solved = True
+
+                print("MATHCHAIN", args)
+            elif command == 2:
+                solved = True
+
+                print("COMPARE", args)
+            elif command == 3:
+                solved = True
+
+                print("GOTO", args)
+            elif command == 4:
+                solved = True
+
+                print("PRINT", args)
+        else:
+            if command == 5:
+                solved = True
+
+                print("TERMINATE")
+            # Single op command with no args
+        if not solved:
+            print("ERROR CANNOT SOLVE")
+            print(line)
+            input()
 
 
 # Calculate indentation level of line
@@ -14,270 +60,197 @@ def indents(line):
     return line, n
 
 
+# Declare all legal flag variables. Replace with program indexes before variable interpolation
+def grab_flags(word, flag_dic):
+    # Returns a dictionary of flags that are legal jump points
+    for line in word:
+        if line[0] == 'flag':
+            # Add to the flag dic
+            flag_dic[line[1]] = len(flag_dic)
+    return flag_dic
+
+
 # Create the appropriate statements to end a for statement
-def terminate_for(line, array, cindex, vardic, flagdic, flag_val, for_cap, debug=False,
-                  fill=False):  # Declare variables and flags first
+def terminate_for(code, for_loop_cap, var_dic):  # Declare variables and flags first
     print("Terminating for loop")
-    # Vardic: array of arrays and their corresponding indexes in the byteword.
-    # c index is the current farthest our commands are going
-    # Generate an array of code that terminates the described for loop.
-    # Should be like, '
-    if not fill:
-        code = [0] * 10  # move cursor 10 sport
-    else:
-        print(for_cap)
-        flag_title = for_cap['flag']
-        var_a = for_cap['incremental_var']
-        var_b = for_cap['var_b']
-        inc = for_cap['increment']
-        op = {'==': 0, '!=': 1, '>=': 2, '>': 3, '<=': 4, '<': 5}[for_cap['op']]
+    print(for_loop_cap)
 
-        code = [1, 0, vardic[var_a], vardic[inc], vardic[var_a], 2, op, vardic[var_a], vardic[var_b],
-                flagdic[flag_title] + 3]  # Add
-    if code[0] == 1:
-        for c, nn in zip(code, range(len(code))):
-            array[flag_val + nn] = c  # Transcribe code snippet to the array
-    # print("Encoded:", code, array)
-    flag_val += len(code)
+    flag_title = for_loop_cap['flag']
+    initializer = for_loop_cap['initializer']
+    incremental = for_loop_cap['incremental']
+    conditional = for_loop_cap['conditional']
+    print(conditional)
+    goto_point = for_loop_cap['goto_point']
+    assert len(conditional) == 3
 
-    return array, cindex, vardic, flagdic, flag_val
+    op = {'==': 0, '!=': 1, '>=': 2, '>': 3, '<=': 4, '<': 5}
+    reverse_op = {'==': 1, '!=': 0, '>=': 4, '>': 5, '<=': 2, '<': 3}
+    # TODO: Construct termination string.
+    out = [2,
+           reverse_op[conditional[0]],
+           '*{}'.format(conditional[1]),
+           '*{}'.format(conditional[2]),
+           goto_point]
+    print(out)
+
+    code += [incremental, out]
 
 
-# Declare flags, for loops, arrays, and variables in memory before assembling commands.
-def get_flags(line, array, cindex, vardic, flagdic, flag_val, active_for, flag_cnt, arrdic,
-              debug=False):  # Declare variables and flags first
-    # Vardic: array of arrays and their corresponding indexes in the byteword.
-    # c index is the current farthest our commands are going
-    # Active for: List of for loops we are actively in
-    code = None
+    # Afex continues if true, otherwise it returns to the goto index
+    # 2 operatorcode index_a index_b goto_index
+
+    # We will actually have to reverse the polarity of the conditional for this...
+
+
+
+    return code, var_dic
+
+
+def process_equal(line, var_dic, debug=False):
+
+    print(line)
+    print(var_dic)
+    # = Follows the format [dst, src]
+    try:
+        float(line[2])
+        if line[2] not in var_dic:
+            var_dic[line[2]] = len(var_dic)
+        # line[2] is the floating point value we need to declare and copy to the line[1] pointer
+        if line[1] not in var_dic:
+            var_dic[line[1]] = len(var_dic)
+        # 0 src dest
+        transcribe = ['0', '*{}'.format(line[2]), '*{}'.format(line[1])]
+        print("A")
+
+    except:  # input is not a float..
+        if line[2] in var_dic:
+            print("B")
+
+            if line[1] not in var_dic:
+                var_dic[line[1]] = len(var_dic)
+            transcribe = ['0', '*{}'.format(line[2]), '*{}'.format(line[1])]
+        # Input is not a variable...
+        else:
+            print("C")
+            # Decompose the commands into a pointer
+            # dest variable, sequence (string, space delimited), vardic
+            # assemble string from line
+            input_str = ''
+            for n in line[2:]:
+                input_str += "{} ".format(n)
+            ptr, pre_string, var_dic, command_tree = dec(input_str, var_dic, debug=debug)
+            pretty_print_command_tree(command_tree)
+            transcribe = [0, '*{}'.format(ptr), '*{}'.format(line[1])]
+            transcribe = [x for x in pre_string.split()] + transcribe
+
+    return transcribe, var_dic
+
+
+# Add functions to code.
+def add_to_code(raw_line, path, index, line, code, var_dic, flag_dic, arr_dic, active_for, debug=False):
     if debug:
-        print(flag_val, line)
+        print(f'\t___________________\n\t{index}]\t {line} (Original)')
+
+    flag_val = len(code)  # What is the flag value if we declare one? #TODO: What does this even mean?
+
     if line[0] == 'flag':
-        flagdic[line[1]] = flag_val
-    if line[0] == '@':
+        flag_dic[line[1]] = flag_val
+
+    elif line[0] == '@':
+        # TODO: Find a formula to find linear index from multidim index values.
         # Declare an array, add to array_dic
         arr_name = line[1]
         arr_dim = len(line) - 1
-        arr_width = line[2]
-        arr_height = line[3]
+        arr_width = int(line[2])
+        arr_height = int(line[3])
+
         arr_len = (arr_width + 1) * (arr_width + 1)
-        #TODO: Check if the variable exists before declaring it in memory
-        varindex = len(vardic) + 1
-        arrdic[arr_name] = {'name': arr_name, "fulldim": line[2:], "dim": arr_dim, "x": arr_width, 'y': arr_height, 'ptr': len(array) - varindex - arr_len }
-        print(arrdic[arr_name])
-        varindex += arr_len
-    if line[0] == '=':  # Command for declaring flags and variables
-        if line[1] not in vardic:
-            varindex = len(vardic) + 1
-            varname = line[1]
-            value = line[2]
-            assert varname not in vardic, 'Variable with this name has been previously defined.'
+        # TODO: Check if the variable exists before declaring it in memory
+        arr_dic[arr_name] = {'name': arr_name, "fulldim": line[2:], "dim": arr_dim, "x": arr_width, 'y': arr_height,
+                             'ptr': len(var_dic)}
 
-            vardic[varname] = len(array) - varindex
-            array[vardic[varname]] = value
+        # ADD ARRAY POINTERS TO VARDIC
+        def add_array(vardic, lst, varindex, arrname):
+            mga_lst = [range(z) for z in lst]  # Find all permetutations
+            res = list(itertools.product(*mga_lst))
+            for combo in res:
+                name = '@@_{}_{}'.format(arrname, str(combo))
+                vardic[name] = varindex
+                varindex = len(vardic)
+            return vardic
 
-        else:
-            print("FIXME")  # FIXME. We want to set variable values throughout the code.
-            # Copy the value
-            ...
+        vardic = add_array(var_dic, [int(x) for x in line[2:]], var_dic, '{}'.format(arr_name))
+        print(arr_dic[arr_name])
+        varindex = len(vardic)
+        print(vardic)
+
+    elif line[0] == '=':
+        # FIRST: Get variable aliases.
+
+        transcribe, var_dic = process_equal(line, var_dic, debug=debug)
+
+        # Command for declaring flags and variables
+        # Also declare the value, if it's not declared
     elif line[0] == 'for':  # Add object to active_for
-        flag_cnt += 1
-        if len(line) == 5:  # User has defined increment value
-            # If it's not a variable, declare it as one (Only if it's a number).
-            try:
-                inc = float(line[4])
-                # Add to the var dic
-                if line[4] not in vardic:
-                    varindex = len(vardic) + 1
-                    varname = float(line[4])
-                    value = float(line[4])
-                    vardic[varname] = len(array) - varindex
-                    array[vardic[varname]] = value
-            except:
-                inc = line[4]
-        else:
-            inc = 1
-        title = 'for_{}_{}_{}_{}_{}'.format(line[1], line[2], line[3], inc, flag_cnt)
-        # Declare line[1:3] as variables (If it's not already)
-        # line[1] set to a value of line[2]
 
-        if line[1] not in vardic:
-            varindex = len(vardic) + 1
+        # TODO: I want to change the syntax of for loops to allow for chained math in the definitoins.
+        # TODO: EG, For = n 0 . < n max_iter . = + n 2
 
-            varname = line[1]
-            value = line[2]
-            vardic[varname] = len(array) - varindex
-            array[vardic[varname]] = value
-        for i in line[2:(len(line) - 1)]:  # If floats are declared as boundaries,
-            if i not in vardic:
-                try:
-                    float(i)
-                    varindex = len(vardic) + 1
-                    varname = i
-                    value = float(i)
-                    vardic[varname] = len(array) - varindex
-                    array[vardic[varname]] = value
-                except:
-                    pass
+        args = [list(y) for x, y in itertools.groupby(line[1:], lambda z: z == '.') if not x]
+        # First set of commands are run before the for loop starts.
+        # It has to be an initializer, so we will use the process_equal command.
+        transcribe_initializer, var_dic = process_equal(args[0], var_dic)
 
-        flagdic[title] = flag_val
-        if inc >= 0:  # What direction
-            op = '>='
-        else:
-            op = '<='
+        #var_dic, arg_dic, _ = split_commands_and_args(string, var_dic, debug=debug)  # TODO: Is this really necessary?
+
+        transcribe_terminus, var_dic = process_equal(args[2], var_dic)
+
+        # inc_ptr, pre_string, var_dic, command_tree = dec(arg_dic[3], var_dic, debug=debug)
+
+        title = 'for_{}'.format(len(flag_dic))
+        goto_point = 0
+        for x in code:
+            goto_point += len(x)
+        goto_point += len(transcribe_initializer)
 
         # Copy initializer value into incremental
-        code = [0, 0, 0]  # Transcribe to the array
         active_for.append(
-            {'flag': title, 'incremental_var': line[1], 'var_a': line[2], 'var_b': line[3], 'increment': inc, 'op': op,
-             'cnt': flag_cnt + 3})  # Add 3 because we add a copy operation before the flag
-    # MATH FUNCTIONS
-    if line[0] in ['^', '*', '/', '+', '-', 'flag']:  # Functions with 5 arguments
-        code = [0, 0, 0, 0, 0]
+            {'flag': title,
+             'initializer': transcribe_initializer,
+             'conditional': args[1],
+             'incremental': transcribe_terminus,
+             'goto_point': goto_point})  # Add 3 because we add a copy operation before the flag
+
+        transcribe = transcribe_initializer
+
+
+
     elif line[0] == 'peek':
-        code = [0, 0, 0, 0]
+        inp = ' '.join(line[1:])
+
+
+        ptr, pre_string, var_dic, command_tree = dec(inp, var_dic, debug=debug)
+        print("PRE STRING")
+        print(pre_string)
+        transcribe = [x for x in pre_string.split(' ') if x != ''] + [0, '{}'.format(ptr), 0, 4]
     elif line[0] == 'kill':
-        code = [0]
-    elif line[0] == '&':  # Copy operator
-        code = [0, 0, 0]
-    if code is not None:
-        flag_val += len(code)
+        transcribe = [5]
 
-    return array, cindex, vardic, flagdic, flag_val, active_for, flag_cnt
-
-
-# Add commands to array.
-def parse_array(line, array, cindex, vardic, flagdic, flag_val, active_for, flag_cnt, debug=False):
-    # Vardic: array of arrays and their corresponding indexes in the byteword.
-    # c index is the current farthest our commands are going
-    code = None
-    byteword = len(array)
-    varindex = len(vardic) + 1
-    if debug:
-        print(flag_val, line)
-
-    if line[0] == 'for':  # Add object to active_for
-        flag_cnt += 1
-        if len(line) == 5:  # User has defined increment value
-            inc = float(line[4])
-        else:
-            inc = 1
-        title = 'for_{}_{}_{}_{}_{}'.format(line[1], line[2], line[3], inc, flag_cnt)
-        # Declare line[1:3] as variables (If it's not already)
-        # line[1] set to a value of line[2]
-
-        if line[1] not in vardic:
-            varindex = len(vardic) + 1
-
-            varname = line[1]
-            value = line[2]
-            vardic[varname] = len(array) - varindex
-            array[vardic[varname]] = value
-        for i in line[2:(len(line) - 1)]:  # If floats are declared as boundaries,
-            if i not in vardic:
-                try:
-                    float(i)
-                    varindex = len(vardic) + 1
-                    varname = i
-                    value = float(i)
-                    vardic[varname] = len(array) - varindex
-                    array[vardic[varname]] = value
-                except:
-                    pass
-
-        flagdic[title] = flag_val
-        if inc >= 0:  # What direction
-            op = '>='
-        else:
-            op = '<='
-
-        # Copy initializer value into incremental
-        code = [0, vardic[line[2]], vardic[line[1]]]  # Transcribe to the array
-        active_for.append(
-            {'flag': title, 'incremental_var': line[1], 'var_a': line[2], 'var_b': line[3], 'increment': inc, 'op': op,
-             'cnt': flag_cnt + 3})  # Add 3 because we add a copy operation before the flag
-
-    # MATH FUNCTIONS
-    if line[0] in lgl_cmd:
-        ...
-    elif line[0] == '^':  # Exponent function
-        source_a = line[1]
-        source_b = line[2]
-        dest = line[3]
-        # print("{}^{} -> {}".format(source_a, source_b, dest))
-        # 1 4 sa sb d
-        code = [1, 4, vardic[source_a], vardic[source_b], vardic[dest]]
-    elif line[0] == '*':  # Multiply function
-        source_a = line[1]
-        source_b = line[2]
-        dest = line[3]
-        # print("{}*{} -> {}".format(source_a, source_b, dest))
-        # 1 2 sa sb d
-        code = [1, 2, vardic[source_a], vardic[source_b], vardic[dest]]
-    elif line[0] == '/':  # Divide function
-        source_a = line[1]
-        source_b = line[2]
-        dest = line[3]
-        # print("{}/{} -> {}".format(source_a, source_b, dest))
-        # 1 3 sa sb d
-        code = [1, 3, vardic[source_a], vardic[source_b], vardic[dest]]
-    elif line[0] == '+':  # Add function
-        source_a = line[1]
-        source_b = line[2]
-        dest = line[3]
-        # print("{}+{} -> {}".format(source_a, source_b, dest))
-        # 1 0 sa sb d
-        code = [1, 0, vardic[source_a], vardic[source_b], vardic[dest]]
-    elif line[0] == '-':  # minus function
-        source_a = line[1]
-        source_b = line[2]
-        dest = line[3]
-        # print("{}-{} -> {}".format(source_a, source_b, dest))
-        # 1 1 sa sb d
-        code = [1, 1, vardic[source_a], vardic[source_b], vardic[dest]]
-    elif line[0] == 'flag':  # Flag function.
-        # flag [operator] [source asset] [source b] [False flag]
-
-        operator = {'==': 0, '!=': 1, '>=': 2, '>': 3, '<=': 4, '<': 5}[line[1]]
-        source_a = line[2]
-        source_b = line[3]
-        false_flag = line[4]
-        # If the statement source_a [operator] source_b is true, continue else go to false_flag
-        code = [2, operator, vardic[source_a], vardic[source_b], flagdic[false_flag]]
-    elif line[0] == 'peek':
-        source = line[1]
-        code = [0, vardic[source], 0, 4]
-    elif line[0] == 'kill':
-        code = [5]
-    elif line[0] == '&':  # Copy operator
-        src = line[1]
-        dst = line[2]
-        code = [0, vardic[src], vardic[dst]]
-    else:
-        print("Unknown command {}".format(line))
+    else:  # Invalid command
+        print("Compilation error. Terminating.")
+        print("Traceback (Most recent call last)")
+        print(f'\t File "{path}", line {index}')
+        print(f'\t\t{raw_line}')
+        l = ' '.join(line)
+        print(f'\t\t{l}')
+        print(f'\t\tError: {line[0]} is not a valid operator. ')
         exit()
-    if code is not None:
-        # print(code)
-        for c, nn in zip(code, range(len(code))):
-            array[flag_val + nn] = c  # Transcribe code snippet to the array
-        flag_val += len(code)
 
-    return array, cindex, vardic, flagdic, flag_val, active_for, flag_cnt
-
-
-# FIXME: Delete this part (Unnecessary)
-def get_byteword(word):
-    byteword_exists = False  # Has the user declared the program byteword
-    for operation in word:
-        if 'byteword' in operation:
-            byteword = operation[1]
-            byteword_exists = True
-    assert byteword_exists, 'ERROR. no byteword declared, program cannot compile. '
-    assert int(byteword) == float(byteword), 'ERROR. byteword must be of type int'
-    byteword = int(byteword)
-    assert byteword > 1, 'Program must be at least one byteword.'
-    print("BYTEWORD:", byteword)
-    return byteword
+    # add transcibe to code
+    if debug:
+        print(f'\t{index}]\t {transcribe} (Parsed)\n')
+    code += [transcribe]
+    return code, var_dic, flag_dic, arr_dic, active_for
 
 
 # Strip line of comments
@@ -307,110 +280,126 @@ def decomment(line):
     return newstr
 
 
-# Convert a .rr file to bytecode
-def compile(source, dest, debug=False):
-    path = source
-    word = []
-    var_index = {}
-    flag_index = {}
-    arrdic = {}
-    file = open(path)
-    for line in file:
-        word_line = decomment(line)
-        specific_lines = word_line.split(';')
-        for sl in specific_lines:
-            if sl not in ['', '\n']:
-                operation = []
-                sl = sl.split(' ')
-                for key in sl:
-                    if key not in ['', '\t', '\n']:
-                        key = re.sub('\n', '', key)
-                        if len(key) > 0:
-                            operation.append(key)
-                if len(operation) > 0:
-                    word.append(operation)
+def pack(code, var_dic):
+    # Take the code and the variable dic and pack it into a single afex structure
+    # TODO: If it's a number, make sure to define it's value
 
-    byteword = get_byteword(word)
-    afex = np.zeros(byteword)
-    cindex = 1
-    command_index = 1  # Location to jump to when we declare asset flag.
+
+
+    output = []
+    for x in code:
+        for i in x:
+            output.append(i)
+
+    variable_start_point = len(output)
+
+
+    new_var_dic = {}
+
+    for index, x in enumerate(var_dic):
+        try:
+            float(x)
+            # Set the value appropriately
+            new_var_dic['*{}'.format(str(x))] = {'index': variable_start_point + index}
+            output.append(float(x))
+        except:
+            # String var automaticaly set to 0
+
+            new_var_dic['*{}'.format(str(x))] = {'index': variable_start_point + index}
+            output.append(0)
+
+
+    print(output)
+    new_output = []
+    for i in output:
+        if type(i) == str:
+            if i[0] == '*': # Replace with pointer value
+                new_output.append(new_var_dic[i]['index'])
+            else:
+                new_output.append(i)
+        else:
+            new_output.append(i)
+    l = len(new_output)
+    padding = 512 - l
+    padding = ' 0'*padding
+    new_output = ' '.join([str(i) for i in new_output]) + padding
+    return new_output
+
+# Convert a .rr file to bytecode
+def compile(path, dest, debug=False):
+    word = []  # This is the list of codes and their arguments.
+    code = []  # This is the list of commands that our turing tape exists on.
+
+    var_dic = {}
+    flag_dic = {}
+    arr_dic = {}
+
+    if debug:
+        print("[~~~~~ 1. STARTING CLEANSING ~~~~~}")
+    with open(path) as file:
+        for index, line in enumerate(file):
+            word_line = decomment(line)
+            specific_lines = word_line.split(';')
+            for sl in specific_lines:
+                if sl not in ['', '\n']:
+                    operation = []
+                    sl = sl.split(' ')
+                    temp_op = []  # Just for debug
+                    for key in sl:
+
+                        if key not in ['', '\t', '\n']:
+                            key = re.sub('\n', '', key)  # Why??
+                            if len(key) > 0:
+                                temp_op.append(key)
+                                operation.append(key)
+
+                    if debug:
+                        temp_op = ' '.join(temp_op)
+                        print(f'\t{index}]\t {temp_op}')
+
+                    if len(operation) > 0:
+                        word.append({'set': operation,
+                                     'raw': line})
+
     indentation_level = 0
     active_for = []  # FILO list of for loops to satisfy
-    flag_cnt = 0
-    # This iteration assigns variables
-    for set in word:  # Iterate through the set to get the flags for pointer future
+    if debug:
+        print("[~~~~~ 2. COMPILING ~~~~~}")
+    for index, set in enumerate(word):
+
         prev_indentation_level = indentation_level
-
-        # If the previous indentation level is higher, we need to end the for loops with comparator ops
-        # We could make a list of for loops, with the last element the first for loop to finish
-        # Number to satisfy equal to prev_indentation_level - indentation_level
-
+        raw_line = set['raw']
+        set = set['set']
         set, indentation_level = indents(set)
+
         for_loop_satisfy = prev_indentation_level - indentation_level
+
+        # Terminate the for loop if our indentation level has dropped
         if for_loop_satisfy > 0:
-            # Iterate through active_for backwards.
-            for satisfy_index in range(for_loop_satisfy):
+            # add conditions to satisfy for loop before continuing.
+            for _ in range(for_loop_satisfy):
                 print("Active for: ", active_for)
                 for_loop_cap = active_for[-1]
                 active_for = active_for[:-1]
-                # Add the comparison operations into the afex, and move cursor forward appropriately.
-                # We will still need to add the relevent commands after this
-                afex, cindex, var_index, flag_index, command_index = terminate_for(set, afex, cindex, var_index,
-                                                                                   flag_index,
-                                                                                   command_index, for_loop_cap,
-                                                                                   debug=debug)
+                code, var_dic = terminate_for(code, for_loop_cap, var_dic)
 
-        if debug:
-            print("Flags: ", flag_index)
-            print("Variable pointers: ", var_index)
-        afex, cindex, var_index, flag_index, command_index, active_for, flag_cnt = get_flags(set, afex, cindex,
-                                                                                             var_index,
-                                                                                             flag_index, command_index,
-                                                                                             active_for, flag_cnt, arrdic,
-                                                                                             debug=debug)
+        code, var_dic, flag_dic, arr_dic, active_for = add_to_code(raw_line,
+                                                                   # Unedited, uncommented line in case we have to traceback
+                                                                   path,
+                                                                   index,
+                                                                   set,
+                                                                   code,
+                                                                   var_dic,
+                                                                   flag_dic,
+                                                                   arr_dic,
+                                                                   active_for,
+                                                                   debug=debug)
 
-    cindex = 1
-    command_index = 1  # Location to jump to when we declare asset flag.
-    indentation_level = 0
-    active_for = []  # FILO list of for loops to satisfy
-    flag_cnt = 0
-
-    # This iteration assigns commands
-    for set in word:
-        prev_indentation_level = indentation_level
-
-        # If the previous indentation level is higher, we need to end the for loops with comparator ops
-        # We could make a list of for loops, with the last element the first for loop to finish
-        # Number to satisfy equal to prev_indentation_level - indentation_level
-
-        set, indentation_level = indents(set)
-        for_loop_satisfy = prev_indentation_level - indentation_level
-
-        if for_loop_satisfy > 0:
-            # Iterate through active_for backwards.
-            print(for_loop_satisfy, active_for)
-            for satisfy_index in range(for_loop_satisfy):
-                for_loop_cap = active_for[-1]
-                active_for = active_for[:-1]
-                # Add the comparison operations into the afex, and move cursor forward appropriately.
-                # We will still need to add the relevent commands after this
-                afex, cindex, var_index, flag_index, command_index = terminate_for(set, afex, cindex, var_index,
-                                                                                   flag_index,
-                                                                                   command_index, for_loop_cap,
-                                                                                   fill=True, debug=debug)
-
-        afex, cindex, var_index, flag_index, command_index, active_for, flag_cnt = parse_array(set, afex, cindex,
-                                                                                               var_index, flag_index,
-                                                                                               command_index,
-                                                                                               active_for, flag_cnt,
-                                                                                               debug=debug)
-
-    string = ''
-    for x in afex:
-        string += str(float(x)) + ' '
-    if debug:
-        print(string)
-    # Write the string to dest file.
-    with open(dest, 'w') as d:
-        d.write(string)
-    print("Compiled {}".format(dest))
+    # After this: go through the code, assign indexes to variables in var_dic and appropriately re-name in the code list
+    print(code)
+    print(var_dic)
+    decompile(code, var_dic)
+    turing_tape = pack(code, var_dic)
+    print(turing_tape)
+    with open(dest, 'w') as f:
+        f.write(turing_tape)

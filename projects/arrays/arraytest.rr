@@ -1,4 +1,4 @@
-byteword 512;
+byteword 2048;
 
 @ my_array 10 10
 

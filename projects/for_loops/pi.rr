@@ -1,14 +1,19 @@
-byteword 64 ((Set the maximum length as 64.))
+= frac 0;
+= pow 0;
+= n 0;
+= sum 0;
+= max_iter 100000;
 
-= frac 0; = pow 0; = n 0; = sum 0; = 1 1; = -1 -1; = 2 2; = 4 4 ;= max_iter 100000; = 1 1
+for = n 0 .  < n max_iter . = n + n 1
+	= pow ^ -1 n
+	= frac * n 2
+	= frac + frac 1
+	= frac / pow frac
+	= frac * 4 frac
+	= sum + frac sum
+	peek sum
+    peek sum
 
-for n max_iter
-	^ -1 n pow
-	* n 2 frac 
-	+ 1 frac frac
-	/ pow frac frac 
-	* 4 frac frac
-	+ frac sum sum
-peek sum
+
 kill
 
