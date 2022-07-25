@@ -1,4 +1,4 @@
-# River Programming Language
+![River Programming Language](img/river.jpg)
 
 
 
