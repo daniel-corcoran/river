@@ -1,0 +1,8 @@
+= sum 0;
+= sum + 400 100;
+
+print sum
+
+
+
+kill

@@ -1,0 +1,37 @@
+html {
+    height: 100%;
+}
+body {
+    height: 100%;
+    background-color: #222222;
+}
+
+.section {
+    border: solid 2px white;
+    border-radius: 1%;
+    color: white;
+}
+#main-window {
+    height: 70%;
+    display: flex;
+}
+#toolbar {
+    width: 100%;
+}
+.toolbar-button {
+    background-color: #444444;
+    color: white;
+
+}
+#editor {
+    height: 80%;
+    width: 66%;
+}
+#decompiled {
+    width: 34%;
+}
+
+#console {
+    height: 15%;
+    width: 100%;
+}

@@ -11,8 +11,8 @@ for = n 0 .  < n max_iter . = n + n 1
 	= frac / pow frac
 	= frac * 4 frac
 	= sum + frac sum
-	peek sum
-    peek sum
+	print sum
+    print sum
 
 
 kill
