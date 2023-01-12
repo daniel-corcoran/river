@@ -9,7 +9,7 @@
 </head>
 <body>
 
-<div id="toolbar" class="section">
+<div id="toolbar">
 {% include 'toolbar.html' %}
 </div>
 
@@ -21,10 +21,16 @@
       {% include 'decompiled.html' %}
     </div>
 </div>
+<div id="bottom-window" class="section">
+  <div id="console" class="section">
+        {% include 'console.html' %}
+  </div>
+    <div id="compiler-debug" class="section">
+        <p style="color: lightgray; font-size: 30px;">Compiler Debug - Coming Soon</p>
+    </div>
 
-<div id="console" class="section">
-  {% include 'console.html' %}
 </div>
+
 
 </body>
 </html>

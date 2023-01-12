@@ -1,8 +1,9 @@
 from app import app
 from flask import render_template, request, jsonify
 import random
+import sys
 from os import popen
-
+import traceback
 
 from interpreter import parse
 
@@ -38,17 +39,32 @@ def compile():
     with open(src, 'w') as f:
         f.write(code)
     # parse.compile(src, dst)
+    try:
+        parse.compile(src, dst)
+        with open(dst) as f:
+            out = f.readlines()
+        print(out)
+        return_struc = {
+            'error': False,
+            'compiled': out
+        }
+    except BaseException as e:
+        ex_type, ex_value, ex_traceback = sys.exc_info()
+        trace_back = traceback.extract_tb(ex_traceback)
+        stack_trace = ''
+        stack_trace += "Exception type : %s <br> " % ex_type.__name__
+        stack_trace += "Exception message : %s <br>" % ex_value
+        for trace in trace_back:
+            stack_trace+= "File : %s , Line : %d, Func.Name : %s, Message : %s" % (trace[0], trace[1], trace[2], trace[3])
 
-    parse.compile(src, dst)
+        print("ERROR")
+        print(e)
+        return_struc = {
+            'error': True,
+            'error_msg': stack_trace
+        }
 
-    with open(dst) as f:
-        out = f.readlines()
-    print(out)
-    return_struc = {
-        'error': False,
-        'compiled': out
-    }
-
+        print("Stack trace : %s" % stack_trace)
     return jsonify(return_struc)
 
 @app.route("/")

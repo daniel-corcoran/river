@@ -1,7 +1,0 @@
-= sum 0;
-= sum + 1 1;
-print sum
-
-
-
-kill
