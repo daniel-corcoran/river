@@ -1,0 +1,43 @@
+<style>
+  #editor-window {
+    width:100%;
+    height:100%;
+  font-family: 'Consolas', 'Deja Vu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+
+    background-color: black;
+    color: white;
+    border:none;
+    outline:none;
+  }
+</style>
+
+
+<textarea id='editor-window'>
+(( This program calculates pi))
+= sum 0;
+= max_iter 1000;
+
+for = n 0 .  < n max_iter . = n + n 1
+	= sum + sum * 4 / ^ -1 n . + * n 2 . 1
+	print sum
+
+kill
+</textarea>
+
+<script>
+	document.getElementById('editor-window').addEventListener('keydown', function(e) {
+  if (e.key == 'Tab') {
+    e.preventDefault();
+    var start = this.selectionStart;
+    var end = this.selectionEnd;
+
+    // set textarea value to: text before caret + tab + text after caret
+    this.value = this.value.substring(0, start) +
+      "\t" + this.value.substring(end);
+
+    // put caret at right position again
+    this.selectionStart =
+      this.selectionEnd = start + 1;
+  }
+});
+</script>

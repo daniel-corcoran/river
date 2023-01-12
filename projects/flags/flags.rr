@@ -1,0 +1,5 @@
+= a 0 .
+flag my_flag;
+= a + 1 a .
+print a
+goto my_flag

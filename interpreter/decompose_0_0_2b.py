@@ -1,6 +1,8 @@
 
 mathop = {'+': 0, '-': 1, '*': 2, '/': 3, '^': 4}
 
+
+
 def pretty_print_command_tree(command_tree, depth = 0):
     print(command_tree)
     # print(command_tree)

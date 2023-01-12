@@ -1,14 +1,11 @@
 (( This program calculates the fibonacci sequence to ten digits. ))
 
-(( TODO, we should be able to remove the byteword arg, and do malloc manually.... ))
-byteword 64
-
 = number_iterations 10
 
 = a 0; = b 1; = c 0; = 1 1; = i 0
 
 = for flag
-peek b
+print b
 + a b c;& b a;& c b;+ i 1 i
 flag > i number_iterations for
 kill

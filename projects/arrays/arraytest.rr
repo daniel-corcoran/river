@@ -5,5 +5,5 @@ byteword 2048;
 for a 0 10
     for b 0 10
         my_array a b a
-peek my_array
+print my_array
 kill

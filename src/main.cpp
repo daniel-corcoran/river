@@ -6,62 +6,58 @@
 #include <cmath>
 //Compiler functions
 
-bool logic(int operand, long double value_a, long double value_b) {
+bool logic(int operand, long double value_a, long double value_b, bool debug) {
 	bool statement;
 //	std::cout << value_a <<  " [comparator: " << operand << "] " << value_b << std::endl;
 	switch (operand) {
 	case 0:
-	    std::cout << "==";
+	    if(debug){std::cout << "==";}
 		statement = (value_a == value_b);
 		break;
 	case 1:
-		    std::cout << "!=";
-
+        if(debug){std::cout << "!=";}
 		statement = (value_a != value_b);
 		break;
 	case 2:
-		    std::cout << ">=";
-
+        if(debug){std::cout << ">=";}
 		statement = (value_a >= value_b);
 		break;
 	case 3:
-		    std::cout << ">";
-
+        if(debug){std::cout << ">";}
 		statement = (value_a > value_b);
 		break;
 	case 4:
-		    std::cout << "<=";
-
+        if(debug){std::cout << "<=";}
 		statement = (value_a <= value_b);
 		break;
 	case 5:
-        std::cout << "<";
+        if(debug){std::cout << "<";}
 		statement = (value_a < value_b);
 		break;
 	}
 	return statement;
 }
-long double arithmatic(int operand, long double value_a, long double value_b) {
+long double arithmatic(int operand, long double value_a, long double value_b, bool debug) {
 	long double result;
 	switch (operand) {
 	case 0:
-	    std::cout << "+";
+	    if(debug){std::cout << "+";}
 		result = value_a + value_b;
 		break;
 	case 1:
-        std::cout << "-";
+        if(debug){std::cout << "-";}
 		result = value_a - value_b;
 		break;
 	case 2:
-        std::cout << "*";
+        if(debug){std::cout << "*";}
 		result = value_a * value_b;
 		break;
 	case 3:
-        std::cout << "/";
+        if(debug){std::cout << "/";}
 		result = value_a / value_b;
 		break;
 	case 4:
-        std::cout << "^";
+        if(debug){std::cout << "^";}
 		result = pow(value_a, value_b);
 		break;
 	}
@@ -104,8 +100,6 @@ long double process(long double *afex_array, bool debug) {
 			index_a = afex_array[index + 2];
 			index_b = afex_array[index + 3];
 
-
-
 			index_result = afex_array[index + 4];
 
 			//determine operands;
@@ -114,7 +108,7 @@ long double process(long double *afex_array, bool debug) {
 
             if(debug){std::cout << "MATHOP *" << index_a << " ("<<  value_a << ") ";}
 			//Calculate result in arithmatic function and store to afex array result index
-			afex_array[index_result] = arithmatic(afex_operator, value_a, value_b);
+			afex_array[index_result] = arithmatic(afex_operator, value_a, value_b, debug);
 			//std::cout << "math\n";
             if(debug){std::cout << " *" << index_b <<" (" << value_b << ")" << " -> *" << index_result << std::endl;}
 
@@ -138,7 +132,7 @@ long double process(long double *afex_array, bool debug) {
 			if(debug){std::cout << "TERNARY *" << index_a << " (" << value_a << ") ";}
 
 			//Get boolean result
-			result = logic(afex_operator, value_a, value_b);
+			result = logic(afex_operator, value_a, value_b, debug);
 
             if(debug){std::cout << " *" << index_b << " (" << value_b << ") | GOTO " << goto_index << " IF FALSE | RESULT: " << result << "\n";}
 

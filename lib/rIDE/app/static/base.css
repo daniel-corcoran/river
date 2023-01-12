@@ -1,0 +1,52 @@
+html {
+    height: 100%;
+}
+body {
+    height: 100%;
+    background-color: black;
+    overflow-y: hidden;
+}
+
+.section {
+    border: solid 1px #9999D2;
+    color: white;
+}
+#main-window {
+    height: 70%;
+    display: flex;
+}
+#toolbar {
+    width: 100%;
+    display:flex;
+}
+.toolbar-button {
+    background-color: #444444;
+    color: white;
+
+}
+#editor {
+    height: 100%;
+    width: 66%;
+}
+#decompiled {
+    width: 34%;
+    padding-right:4px;
+}
+
+#console {
+    width: 66%;
+    height: 100%;
+    overflow-y: scroll;
+    border-right: none;
+}
+#compiler-debug {
+    width: 34%;
+    height: 100%;
+    overflow-y: scroll;
+    padding-right: 4px;
+
+}
+#bottom-window {
+    height: 23%;
+    display: flex;
+}

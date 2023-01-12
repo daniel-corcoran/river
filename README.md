@@ -28,7 +28,6 @@ python3 compile.py projects/for_loops/pi_chained.rr projects/for_loops/pi_chaine
 
 
 ## Programming specification
-#### Note: I still need to update this, some of these don't work anymore with updates to the mathematical notation
 
 1. Declaring variables
 
@@ -36,9 +35,8 @@ python3 compile.py projects/for_loops/pi_chained.rr projects/for_loops/pi_chaine
     
     Example:
     ```
-   byteword 64;
    = pi 3.14159
-   peek pi
+   print pi
    
    output: 3.14159
    ```
@@ -50,41 +48,44 @@ python3 compile.py projects/for_loops/pi_chained.rr projects/for_loops/pi_chaine
     
     Example: 
     ```
-    byteword 64;
-    = 5 5;
+   (( Note - this is currently not implemented ))
+    = a 5 . 
     = my_flag flag;
-    + 5 5 5
-    peek 5 
-    $ my_flag
-    kill;
-   
+    = a + 5 a . .
+    print a
+    goto my_flag
+  
     output: 10 20 40 80 160 ... ...
-    ```
+    ``` 
     
 3. Ternary operators
     
-    `flag [operator] [variable 1] [variable 2] [flag name]`
+   `[operator] [variable 1] [variable 2] [flag name]`
+   
+   
+Ternary operators     
+
+Legal operators: != == <= < >= >`
+If (variable 1) operator (variable_2) is true, continue to next line.
     
-    Legal operators: `!= == <= < >= >`
-    If (variable 1) operator (variable_2) is true, continue to next line.
+If false, go to the flag statement.
     
-    If false, go to the flag statement.
-    
-    Example:
-    ```
+Example:
+
+
    byteword 64 (( Allocate 64 spaces ))
    = counter 0
    = max_count 10
    = 1 1 (( Since all values must be variables, we define integers individually. ))
    flag my_flag (( We can jump to this point from anywhere in the code. ))
-   + 1 counter counter
-   peek counter
-   > counter max_count my_flag
-   kill
++ 1 counter counter
+print counter
+`> counter max_count my_flag`
+kill
+> 
    
    Output: 1 2 3 4 5 6 7 8 9 10
-   
-    ```
+  
 4. Mathematical operations
     
    the way math works in this language is pretty peculiar, I will do a writeup on it soon
@@ -104,25 +105,24 @@ python3 compile.py projects/for_loops/pi_chained.rr projects/for_loops/pi_chaine
 5. FOR loops
    ### Note, a major update has changed the way this works as well, see the pi example for syntax, a writeup is needed  
    ```
-        for [counter] [endpoint] [increment]
-           ...   
+   = iter 3
+   for = a 0 . < a iter . = a + a 1
+       print a
+       for = b 0 . < b iter . = b + b 1
+           print b
+   
+   Output: 0 0 1 2 3 1 0 1 2 3 2 1 2 3
     ```                
    
-6. Nested operations
-    ```
-    + ^ a b c. + 5 5. out
-   peek out
-   = a 2; = b 3; = c 4; = out 0;
    
-   Output: (2 ^ 3 ^ 4) + (5 + 5)
-    ```          
 7. Multidimensional arrays
 ``` 
+   (( Note - this is currently not implemented yet ))
     @ my_array 10 10
     for a 0 10
         for b 0 10
             my_array a b a
-    peek my_array
+    print my_array
     
     Output:
     0 1 2 3 4 5 6 7 8 9

@@ -70,6 +70,16 @@ def grab_flags(word, flag_dic):
     return flag_dic
 
 
+
+
+def terminate_if(code, if_cap, var_dic):
+    ...
+    # When we terminate the if statement, we first have to determine if there's an elif statement
+    print("Terminating IF statement")
+
+
+
+
 # Create the appropriate statements to end a for statement
 def terminate_for(code, for_loop_cap, var_dic):  # Declare variables and flags first
     print("Terminating for loop")
@@ -147,14 +157,18 @@ def process_equal(line, var_dic, debug=False):
 
 
 # Add functions to code.
-def add_to_code(raw_line, path, index, line, code, var_dic, flag_dic, arr_dic, active_for, debug=False):
+def add_to_code(raw_line, path, index, line, code, var_dic, flag_dic, arr_dic, active_for_and_if, debug=False):
     if debug:
         print(f'\t___________________\n\t{index}]\t {line} (Original)')
 
-    flag_val = len(code)  # What is the flag value if we declare one? #TODO: What does this even mean?
+
 
     if line[0] == 'flag':
-        flag_dic[line[1]] = flag_val
+        goto_point = 0
+        for x in code:
+            goto_point += len(x)
+        flag_dic[line[1]] = goto_point
+        transcribe = None
 
     elif line[0] == '@':
         # TODO: Find a formula to find linear index from multidim index values.
@@ -191,6 +205,7 @@ def add_to_code(raw_line, path, index, line, code, var_dic, flag_dic, arr_dic, a
 
         # Command for declaring flags and variables
         # Also declare the value, if it's not declared
+
     elif line[0] == 'for':  # Add object to active_for
 
         # TODO: I want to change the syntax of for loops to allow for chained math in the definitoins.
@@ -201,7 +216,7 @@ def add_to_code(raw_line, path, index, line, code, var_dic, flag_dic, arr_dic, a
         # It has to be an initializer, so we will use the process_equal command.
         transcribe_initializer, var_dic = process_equal(args[0], var_dic)
 
-        #var_dic, arg_dic, _ = split_commands_and_args(string, var_dic, debug=debug)  # TODO: Is this really necessary?
+        #var_dic, arg_dic, _ = split_commands_and_args(string, var_dic, debug=debug)  # TODO: Is this really necessary? Yes it it necessary to solve the aforementioned todo
 
         transcribe_terminus, var_dic = process_equal(args[2], var_dic)
 
@@ -214,8 +229,9 @@ def add_to_code(raw_line, path, index, line, code, var_dic, flag_dic, arr_dic, a
         goto_point += len(transcribe_initializer)
 
         # Copy initializer value into incremental
-        active_for.append(
-            {'flag': title,
+        active_for_and_if.append(
+            {'type': "for",
+              'flag': title,
              'initializer': transcribe_initializer,
              'conditional': args[1],
              'incremental': transcribe_terminus,
@@ -223,16 +239,26 @@ def add_to_code(raw_line, path, index, line, code, var_dic, flag_dic, arr_dic, a
 
         transcribe = transcribe_initializer
 
+    elif line[0] in ['if', 'elif', 'else']:
+        print("Processing IF statements...")
 
+        pass
 
-    elif line[0] == 'peek':
+    elif line[0] == 'goto':
+        assert line[1] in flag_dic, "Flag not found"
+        transcribe = [3, flag_dic[line[1]]]
+
+    elif line[0] == 'if':
+        print("FIXME: Need to implement if statements")
+
+    elif line[0] == 'print':
         inp = ' '.join(line[1:])
-
 
         ptr, pre_string, var_dic, command_tree = dec(inp, var_dic, debug=debug)
         print("PRE STRING")
         print(pre_string)
         transcribe = [x for x in pre_string.split(' ') if x != ''] + [0, '{}'.format(ptr), 0, 4]
+
     elif line[0] == 'kill':
         transcribe = [5]
 
@@ -249,8 +275,9 @@ def add_to_code(raw_line, path, index, line, code, var_dic, flag_dic, arr_dic, a
     # add transcibe to code
     if debug:
         print(f'\t{index}]\t {transcribe} (Parsed)\n')
-    code += [transcribe]
-    return code, var_dic, flag_dic, arr_dic, active_for
+    if transcribe is not None:
+        code += [transcribe]
+    return code, var_dic, flag_dic, arr_dic, active_for_and_if
 
 
 # Strip line of comments
@@ -362,7 +389,8 @@ def compile(path, dest, debug=False):
                                      'raw': line})
 
     indentation_level = 0
-    active_for = []  # FILO list of for loops to satisfy
+    active_for_and_if = []  # FILO list of for loops and if statements to satisfy
+
     if debug:
         print("[~~~~~ 2. COMPILING ~~~~~}")
     for index, set in enumerate(word):
@@ -372,18 +400,24 @@ def compile(path, dest, debug=False):
         set = set['set']
         set, indentation_level = indents(set)
 
-        for_loop_satisfy = prev_indentation_level - indentation_level
+        for_loop_and_if_satisfy = prev_indentation_level - indentation_level
 
         # Terminate the for loop if our indentation level has dropped
-        if for_loop_satisfy > 0:
+        if for_loop_and_if_satisfy > 0:
             # add conditions to satisfy for loop before continuing.
-            for _ in range(for_loop_satisfy):
-                print("Active for: ", active_for)
-                for_loop_cap = active_for[-1]
-                active_for = active_for[:-1]
-                code, var_dic = terminate_for(code, for_loop_cap, var_dic)
+            for _ in range(for_loop_and_if_satisfy):
+                print("Active for: ", active_for_and_if)
+                # FIXME
+                for_loop_cap = active_for_and_if[-1]
+                active_for_and_if = active_for_and_if[:-1]
 
-        code, var_dic, flag_dic, arr_dic, active_for = add_to_code(raw_line,
+                if for_loop_cap['type'] == 'for':
+                    code, var_dic = terminate_for(code, for_loop_cap, var_dic)
+                elif for_loop_cap['type'] == 'if':
+                    code, var_dic = terminate_if(code, for_loop_cap, var_dic)
+
+
+        code, var_dic, flag_dic, arr_dic, active_for_and_if = add_to_code(raw_line,
                                                                    # Unedited, uncommented line in case we have to traceback
                                                                    path,
                                                                    index,
@@ -392,7 +426,7 @@ def compile(path, dest, debug=False):
                                                                    var_dic,
                                                                    flag_dic,
                                                                    arr_dic,
-                                                                   active_for,
+                                                                   active_for_and_if,
                                                                    debug=debug)
 
     # After this: go through the code, assign indexes to variables in var_dic and appropriately re-name in the code list

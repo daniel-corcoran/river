@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>rIDE</title>
+  <link rel="stylesheet" href="static/base.css">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script type="text/javascript" src="static/script.js"></script>
+</head>
+<body>
+
+<div id="toolbar">
+{% include 'toolbar.html' %}
+</div>
+
+<div id="main-window" class="section">
+    <div id="editor" class="section">
+      {% include 'editor.html' %}
+    </div>
+    <div id="decompiled" class="section">
+      {% include 'decompiled.html' %}
+    </div>
+</div>
+<div id="bottom-window" class="section">
+  <div id="console" class="section">
+        {% include 'console.html' %}
+  </div>
+    <div id="compiler-debug" class="section">
+        <p style="color: lightgray; font-size: 30px;">Compiler Debug - Coming Soon</p>
+    </div>
+
+</div>
+
+
+</body>
+</html>
