@@ -36,7 +36,7 @@ def create_chained_math(operator, values, var_dic, debug=False):
 def split_commands_and_args(string, var_dic, debug=False):
     if debug:
         print("\t\t\t[~~~~~ SPLITTING COMMANDS AND ARGS ~~~~~]")
-
+    print(f"Var dic at beginning: {var_dic}")
     # Splits the command, and arguments, into individual pieces.
 
     cmd_depth = 0
@@ -52,9 +52,9 @@ def split_commands_and_args(string, var_dic, debug=False):
         try: # TODO: Why are we using try/catch exceptions here?
 
             if cmd_depth == 0: # Declare a number or variable as an individual argument only if cmd depth is at base
-                # TODO: What does this mean?
                 float(arg)
                 if arg not in var_dic:
+                    print(f"{arg} is not in the var dic {var_dic}.")
                     var_dic[float(arg)] = len(var_dic)
                 cur_cmd = len(cmd_ptr_dic)
                 # arg = '*{}'.format(arg)
@@ -84,7 +84,7 @@ def split_commands_and_args(string, var_dic, debug=False):
             # if cur_cmd is not None:
             cmd_ptr_dic[cur_cmd] += arg + ' '
 
-
+    print(f"Var dic at breakpoint: {var_dic}")
     # Remove commands where the last element is a period
     for i in cmd_ptr_dic:
         if debug:
@@ -98,7 +98,11 @@ def split_commands_and_args(string, var_dic, debug=False):
                 nw_str = ''
                 for x in cmd_ptr_dic[i].split()[:-1]:
                     nw_str += x + ' '
+
                 cmd_ptr_dic[i] = nw_str
+        if cmd_ptr_dic[i][-1] == ' ':
+            cmd_ptr_dic[i] = cmd_ptr_dic[i][:-1]
+
     if debug:
         print("Output: var_dic={}, cmd_ptr_dic={}, first_comand={}".format(var_dic, cmd_ptr_dic, first_command))
     return var_dic, cmd_ptr_dic, first_command
@@ -195,7 +199,6 @@ def dec(arguments, var_dic, debug = False):
     # Return variable name as self PTR if in var dic, or
     try:
         float(arguments)
-        print(arguments)
         # Continue if the argument is a number.
         if arguments not in var_dic:
             var_dic[arguments] = len(var_dic)
@@ -212,4 +215,5 @@ def dec(arguments, var_dic, debug = False):
 #_, _, _, command_tree = dec('* + a + b c . . - a b .', {'a': 1, 'b': 2, 'c': 3, 'd': 0, 'e': 0, 'f': 0}, debug=False)
 #pretty_print_command_tree(command_tree)
 
-# print(dec('+ a - a + b c', {'a': 1, 'b': 2, 'c': 3, 'd': 0, 'e': 0, 'f': 0}, debug=True))
+#a, b, c, d = dec('+ a - a + b c', {'a': 1, 'b': 2, 'c': 3}, debug=False)
+#print("")

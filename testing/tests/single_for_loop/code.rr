@@ -1,0 +1,4 @@
+= iter 3
+for = a 0 , < a iter , = a + a 1
+	print a
+kill

@@ -31,23 +31,23 @@ def run():
 
 @app.route("/compile", methods=['POST', 'GET'])
 def compile():
-    tkn = random.randint(100000, 999999999999)
-    code = request.args.get('code', '', str)
-    src = 'tmp/' + str(tkn) + '_src'
-    dst = 'tmp/' + str(tkn) + '_dst'
+    """This function takes input from the frontend and returns compiled AFEX bytecode, as well as debug information."""
 
-    with open(src, 'w') as f:
-        f.write(code)
+    code = request.args.get('code', '', str)
+
     # parse.compile(src, dst)
+    compiler = parse.Compiler()
+
+
+    out = compiler.compile(code, mode='api')
+
+    return_struc = {
+        'error': False,
+        'compiled': out['compiled'],
+        'debug': out['debug']
+    }
     try:
-        parse.compile(src, dst)
-        with open(dst) as f:
-            out = f.readlines()
-        print(out)
-        return_struc = {
-            'error': False,
-            'compiled': out
-        }
+        pass
     except BaseException as e:
         ex_type, ex_value, ex_traceback = sys.exc_info()
         trace_back = traceback.extract_tb(ex_traceback)
@@ -61,7 +61,8 @@ def compile():
         print(e)
         return_struc = {
             'error': True,
-            'error_msg': stack_trace
+            'error_msg': stack_trace,
+            'debug': compiler.debug_string
         }
 
         print("Stack trace : %s" % stack_trace)

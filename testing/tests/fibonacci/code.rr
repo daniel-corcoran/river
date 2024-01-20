@@ -1,0 +1,10 @@
+= number_iterations 10
+= a 0
+= b 1
+= c 0
+for = i 0 , < i number_iterations , = i + i 1
+	print b
+	= a + b c
+	= b a
+	= c b
+kill

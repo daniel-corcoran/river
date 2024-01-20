@@ -1,11 +1,12 @@
 import argparse
 import sys
 
-from interpreter import parse
+from interpreter.parse import Compiler
 import os
 
 if __name__ == '__main__':
-    parse.compile(path=sys.argv[1], dest=sys.argv[2], debug=True)
+    compiler = Compiler()
+    compiler.compile(src=sys.argv[1], dest=sys.argv[2], debug=True)
 
 
 

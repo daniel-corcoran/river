@@ -1,0 +1,11 @@
+This package automatically gets imported by RIDE and all unit tests
+must pass before it bypasses the server.
+
+Each unit test must have two things:
+
+1. The river code and
+2. The expected output
+
+If the expected and calculated outputs dont match it will raise an exception.
+
+
