@@ -30,9 +30,52 @@ kill
 Output: 3.14159
 ```
 
-## Programming Guide
+### Mandelbrot Set
 
-## Programming specification
+```
+= resolution_x 100
+= resolution_y 100
+
+= re_start -2
+= re_end 1
+= im_start -1
+= im_end 1
+
+= max_iteration 100
+
+= re_step / - re_end re_start . resolution_x
+= im_step / - im_end im_start . resolution_y
+
+
+imagebuffer resolution_x resolution_y
+
+for = x_pixel 0 , < x_pixel resolution_x  , = x_pixel + x_pixel 1
+
+	= x_coord + re_start * re_step x_pixel
+
+	for = y_pixel 0 , < y_pixel resolution_y  , = y_pixel + y_pixel 1
+		setpixel x_pixel y_pixel 0
+		= y_coord + im_start * im_step y_pixel
+		= plot 0
+		= x 0
+		= y 0
+
+		for = iteration 0 , < iteration max_iteration , = iteration + iteration 1
+			= xtemp + - * x x . * y y . . x_coord
+			= y + * * 2 x . y . y_coord
+			= x xtemp
+		if > * 2 2 . + * x x . * y y
+			setpixel x_pixel y_pixel 1
+
+
+render
+kill
+```
+
+Output: 
+![img.png](img/img.png)
+
+## Programming Guide
 
 1. Declaring variables
 
