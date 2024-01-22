@@ -1,0 +1,8 @@
+= x 10
+= y 10
+imagebuffer x y
+for = i 0 , < i x , = i + i 2
+	for = j 0 , < j y , = j + j 2
+		setpixel i j 1
+render
+kill

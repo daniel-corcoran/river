@@ -1,0 +1,10 @@
+imagebuffer 10 10
+imagebuffer + 1 2 . + 3 4
+imagebuffer 10 + 4 5
+imagebuffer + 5 6 . 10
+= x 10
+= y 20
+imagebuffer x y
+imagebuffer x 10
+imagebuffer 10 y
+kill

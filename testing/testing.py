@@ -18,6 +18,31 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 
+import re
+
+def compare_strings_except_image_tags(str1, str2):
+    # Regular expression pattern for image tags
+    img_tag_pattern = re.compile(r"<img src=.*?>")
+
+    # Split both strings into lines
+    lines1 = str1.splitlines()
+    lines2 = str2.splitlines()
+
+    # Check if the number of lines is the same
+    if len(lines1) != len(lines2):
+        return False
+
+    # Iterate over each pair of lines
+    for line1, line2 in zip(lines1, lines2):
+        # If both lines are image tags, skip comparison
+        if img_tag_pattern.match(line1) and img_tag_pattern.match(line2):
+            continue
+        # If lines are different, return False
+        if line1 != line2:
+            return False
+
+    # If all non-image tag lines are equal, return True
+    return True
 
 def run_test_by_name(name):
     src_path = f"../../testing/tests/{name}/code.rr"
@@ -88,7 +113,7 @@ def run_test_by_name(name):
     print(bcolors.OKBLUE + expected_out )
     print(bcolors.OKGREEN + "-- Actual out -- ")
     print(bcolors.OKBLUE + out)
-    assert expected_out == out, bcolors.FAIL + 'expected output does not match!!!!!!!!!!'
+    assert compare_strings_except_image_tags(expected_out, out), bcolors.FAIL + 'expected output does not match!!!!!!!!!!'
 
     print(bcolors.OKGREEN + f"Hooray! Test {name} passed!" + bcolors.ENDC)
 

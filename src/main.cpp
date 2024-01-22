@@ -4,7 +4,36 @@
 #include <fstream>
 #include <iomanip>
 #include <cmath>
+#include <random>
+#include <sstream>
 //Compiler functions
+
+#include <stdlib.h>
+#include <string.h>
+
+#include "image.h"
+
+std::string generate_random_filename(int length = 8) {
+    // Characters that can be part of the filename
+    const char charset[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    const size_t charsetSize = sizeof(charset) - 1;
+
+    // Use a random device to seed a Mersenne Twister generator
+    std::mt19937 generator(std::random_device{}());
+    std::uniform_int_distribution<size_t> distribution(0, charsetSize - 1);
+
+    // Build the random string
+    std::stringstream ss;
+    ss << "app/static/render/";
+    for (int i = 0; i < length; ++i) {
+        ss << charset[distribution(generator)];
+    }
+
+    // Append the .bmp extension
+    ss << ".bmp";
+
+    return ss.str();
+}
 
 bool logic(int operand, long double value_a, long double value_b, bool debug) {
 	bool statement;
@@ -74,6 +103,12 @@ long double process(long double *afex_array, bool debug) {
 	long double value;
 	int afex_operator;
 	bool result;
+	bool image_buffer_allocated = false;
+	Image* img_buffer; // We will point it to the image buffer if one is created.
+
+	std::string filename = generate_random_filename();
+	const char* c_f = filename.c_str();
+
 	while (afex_array[index] != 5) { //Cease execution if read 5 (stop)
 	//	std::cout << "Index: " << index << std::endl;
 
@@ -161,6 +196,41 @@ long double process(long double *afex_array, bool debug) {
 			if(debug){std::cout << "terminating" << std::endl;}
 
 			return 0;
+		case 6:
+			// create image buffer.
+			//if(debug){std::cout << "Creating image buffer" << std::endl;}
+
+			std::cout << "< Created imagebuffer size " << static_cast<int>(afex_array[static_cast<int>(afex_array[index + 1])]) << "x" << static_cast<int>(afex_array[static_cast<int>(afex_array[index + 2])]) << " >" << std::endl;
+
+			img_buffer	= create_image_buffer(static_cast<int>(afex_array[static_cast<int>(afex_array[index + 1])]),
+			 								  static_cast<int>(afex_array[static_cast<int>(afex_array[index + 2])]));
+			image_buffer_allocated = true;
+			index = index + 3;
+			break;
+		case 7:
+			// set pixel in image buffer
+			// assert that image buffer already exists?
+			if(image_buffer_allocated){
+			int x = static_cast<int>(afex_array[static_cast<int>(afex_array[index + 1])]);
+			int y = static_cast<int>(afex_array[static_cast<int>(afex_array[index + 2])]);
+			int val = static_cast<int>(afex_array[index+3]);
+				set_pixel(img_buffer, x, y, val);
+				index = index + 4;
+				std::cout << "Setting pixel " << x << " * " << y << " to val " << val << "\n";
+			}else{
+				std::cout << "Error: Image buffer not allocated.\n";
+				index++;
+			}
+			break;
+		case 8:
+			// export the image to bmp file
+
+			save_to_bmp(img_buffer, c_f);
+			std::cout << "<img src='" << filename << "'>\n";
+			index++;
+			break;
+
+
 		default:
 			if(debug){std::cout << "error accessing index " << index << std::endl << "value" << afex_array[index] << std::endl;}
 			return 0;

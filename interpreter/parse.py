@@ -47,11 +47,24 @@ class Compiler:
                     solved = True
 
                     self.debug_message("self.debug_message {}".format(args))
+                elif command == 6:
+                    solved = True
+
+                    self.debug_message("IMAGEBUFFER {}".format(args))
+                elif command == 7:
+                    solved = True
+
+                    self.debug_message("SETPIXEL {}".format(args))
+
             else:
                 if command == 5:
                     solved = True
 
                     self.debug_message("TERMINATE")
+                elif command == 8:
+                    solved = True
+
+                    self.debug_message("RENDER ")
                 # Single op command with no args
             if not solved:
                 self.debug_message("ERROR CANNOT SOLVE")
@@ -442,7 +455,129 @@ class Compiler:
 
                     transcribe = [x for x in pre_string.split(' ') if x != ''] + [0, '*{}'.format(ptr), 0, 4]
 
+        elif line[0] == "imagebuffer":
+            # Send signal to create imagebuffer x*y
+            # Just need to process two variables or chain math and send that to the thing
 
+            # This code is pretty much copy/pasted from the for loop logic so it may be productive to functionalize this section.
+
+            var_dic, cmd_ptr_dic, conditional_command = split_commands_and_args("~ " +" ".join(line[1:]), var_dic,
+                                                                                debug=True)
+
+
+            conditional_left = cmd_ptr_dic[0]
+            conditional_right = cmd_ptr_dic[1]
+            print("\033[0mCONDITIONALS: " + conditional_left, "------", conditional_right)
+            # BREAKDOWN LEFT SIDE
+
+            try:
+                float(conditional_left)
+                print("It's a float!")
+                if float(conditional_left) not in var_dic:
+                    var_dic[float(conditional_left)] = len(var_dic)
+                conditional_left = f"*{float(conditional_left)}"
+            except:
+                # Not a float, could be either a variable or chained math.
+                if conditional_left in var_dic:
+                    print("It's a variable!")
+                    conditional_left = f"*{conditional_left}"
+                else:
+                    print("It's chainmath!")
+                    # Need to do chained math and assign it to a new pointer
+                    ptr_left, pre_string_left, var_dic, command_tree = dec(conditional_left, var_dic, debug=True)
+                    print(f"Pre string: {pre_string_left}")
+                    code += [[x for x in pre_string_left.split(' ') if x is not '']]
+                    conditional_left = f'*{ptr_left}'
+
+            # BREAKDOWN RIGHT SIDE
+
+            try:
+                float(conditional_right)
+                print("It's a float!")
+                if float(conditional_right) not in var_dic:
+                    var_dic[float(conditional_right)] = len(var_dic)
+                conditional_right = f"*{float(conditional_right)}"
+            except:
+                # Not a float, could be either a variable or chained math.
+                if conditional_right in var_dic:
+                    conditional_right = f"*{conditional_right}"
+                else:
+                    # Need to do chained math and assign it to a new pointer
+                    ptr_right, pre_string_right, var_dic, command_tree = dec(conditional_right, var_dic, debug=True)
+                    print(f"Pre string: {pre_string_right}")
+                    code += [[x for x in pre_string_right.split(' ') if x is not '']]
+                    conditional_right = f'*{ptr_right}'
+
+
+            transcribe =        [6,
+                                conditional_left,
+                                conditional_right]
+
+
+        elif line[0] == "setpixel":
+            # setpixel x y 1/0
+
+            # Send signal to set pixel of image buffer
+            # we need to add an assertion that there's a buffer and the x/y falls in range.
+
+
+            # Just need to process two variables or chain math and send that to the thing
+
+            # This code is pretty much copy/pasted from the for loop logic so it may be productive to functionalize this section.
+
+            var_dic, cmd_ptr_dic, conditional_command = split_commands_and_args("~ " + " ".join(line[1:]), var_dic,
+                                                                                debug=True)
+
+            conditional_left = cmd_ptr_dic[0]
+            conditional_right = cmd_ptr_dic[1]
+            print("\033[0mCONDITIONALS: " + conditional_left, "------", conditional_right, "--------", cmd_ptr_dic[2])
+            # BREAKDOWN LEFT SIDE
+
+            try:
+                float(conditional_left)
+                print("It's a float!")
+                if float(conditional_left) not in var_dic:
+                    var_dic[float(conditional_left)] = len(var_dic)
+                conditional_left = f"*{float(conditional_left)}"
+            except:
+                # Not a float, could be either a variable or chained math.
+                if conditional_left in var_dic:
+                    print("It's a variable!")
+                    conditional_left = f"*{conditional_left}"
+                else:
+                    print("It's chainmath!")
+                    # Need to do chained math and assign it to a new pointer
+                    ptr_left, pre_string_left, var_dic, command_tree = dec(conditional_left, var_dic, debug=True)
+                    print(f"Pre string: {pre_string_left}")
+                    code += [[x for x in pre_string_left.split(' ') if x is not '']]
+                    conditional_left = f'*{ptr_left}'
+
+            # BREAKDOWN RIGHT SIDE
+
+            try:
+                float(conditional_right)
+                print("It's a float!")
+                if float(conditional_right) not in var_dic:
+                    var_dic[float(conditional_right)] = len(var_dic)
+                conditional_right = f"*{float(conditional_right)}"
+            except:
+                # Not a float, could be either a variable or chained math.
+                if conditional_right in var_dic:
+                    conditional_right = f"*{conditional_right}"
+                else:
+                    # Need to do chained math and assign it to a new pointer
+                    ptr_right, pre_string_right, var_dic, command_tree = dec(conditional_right, var_dic, debug=True)
+                    print(f"Pre string: {pre_string_right}")
+                    code += [[x for x in pre_string_right.split(' ') if x is not '']]
+                    conditional_right = f'*{ptr_right}'
+
+            transcribe = [7,
+                          conditional_left,
+                          conditional_right,
+                          cmd_ptr_dic[2]]
+
+        elif line[0] == "render":
+            transcribe = [8]
 
 
         elif line[0] == 'kill':
