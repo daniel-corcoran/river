@@ -1,0 +1,10 @@
+= i 0
+flag y
+= i + 1 i
+if > i 6
+	print i
+	kill
+if > i 3
+	print i
+	goto y
+goto y

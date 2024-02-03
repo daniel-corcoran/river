@@ -429,6 +429,7 @@ class Compiler:
 
 
         elif line[0] == 'goto':
+            # TODO: Assume the flag could be assigned later, then we will run a script to resolve GOTOS afterwards.
             assert line[1] in flag_dic, "Flag not found"
             transcribe = [3, flag_dic[line[1]]]
 
@@ -686,6 +687,7 @@ class Compiler:
         elif mode == 'api':
             path = 'river_ide.rr'
             src = src.split('\n')
+        src.append("kill")
         word = []  # This is the list of codes and their arguments.
         code = []  # This is the list of commands that our turing tape exists on.
 
